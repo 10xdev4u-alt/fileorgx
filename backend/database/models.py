@@ -44,3 +44,14 @@ class Rule(Base):
     action_value = Column(String)
     priority = Column(Integer, default=0)
     is_active = Column(Integer, default=1)
+
+class AIDecision(Base):
+    __tablename__ = 'ai_decisions'
+    
+    id = Column(Integer, primary_key=True)
+    file_id = Column(Integer, ForeignKey('files.id'))
+    suggestion = Column(String)  # JSON string of AI suggestion
+    user_action = Column(String) # 'accept', 'reject', 'modify'
+    correction = Column(String)  # JSON string of user correction if any
+    confidence = Column(Integer) # scaled 0-100
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)

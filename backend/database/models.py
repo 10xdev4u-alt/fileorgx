@@ -55,3 +55,14 @@ class AIDecision(Base):
     correction = Column(String)  # JSON string of user correction if any
     confidence = Column(Integer) # scaled 0-100
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class ActionHistory(Base):
+    __tablename__ = 'action_history'
+    
+    id = Column(Integer, primary_key=True)
+    file_id = Column(Integer, ForeignKey('files.id'))
+    action_type = Column(String) # 'move', 'rename', 'copy'
+    src_path = Column(String)
+    dest_path = Column(String)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    is_undone = Column(Integer, default=0)

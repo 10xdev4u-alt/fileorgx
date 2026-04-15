@@ -11,6 +11,24 @@ class FileOrganizer:
         if not os.path.exists(self.base_path):
             os.makedirs(self.base_path)
 
+    def _get_unique_path(self, target_path):
+        """Generates a unique path by appending a suffix if the file exists."""
+        if not os.path.exists(target_path):
+            return target_path
+        
+        path = Path(target_path)
+        name = path.stem
+        ext = path.suffix
+        directory = path.parent
+        
+        counter = 1
+        while True:
+            new_name = f"{name}_{counter}{ext}"
+            new_path = directory / new_name
+            if not new_path.exists():
+                return str(new_path)
+            counter += 1
+
     def move_file(self, src_path, target_dir):
         """Moves a file to a target directory within the base path."""
         try:
@@ -21,11 +39,8 @@ class FileOrganizer:
             file_name = os.path.basename(src_path)
             dest_path = os.path.join(dest_dir, file_name)
             
-            # Handle collision
-            if os.path.exists(dest_path):
-                name, ext = os.path.splitext(file_name)
-                import time
-                dest_path = os.path.join(dest_dir, f"{name}_{int(time.time())}{ext}")
+            # Handle collision safely
+            dest_path = self._get_unique_path(dest_path)
 
             shutil.move(src_path, dest_path)
             logger.info(f"Moved {src_path} to {dest_path}")

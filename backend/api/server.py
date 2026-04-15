@@ -2,11 +2,13 @@ from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from database.db import get_db, init_db
 from database.models import File
+from utils.logger import logger
 
 app = FastAPI(title="Smart File Organizer API")
 
 @app.on_event("startup")
 def startup_event():
+    logger.info("Starting up Smart File Organizer API")
     init_db()
 
 @app.get("/")

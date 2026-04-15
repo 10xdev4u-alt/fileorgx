@@ -29,15 +29,23 @@ class FileOrganizer:
                 return str(new_path)
             counter += 1
 
-    def move_file(self, src_path, target_dir, dry_run=False):
-        """Moves a file to a target directory within the base path."""
+    def move_file(self, src_path, target_dir, dry_run=False, on_conflict='rename'):
+        """Moves a file with specified conflict resolution strategy."""
         try:
             dest_dir = os.path.join(self.base_path, target_dir)
             file_name = os.path.basename(src_path)
             dest_path = os.path.join(dest_dir, file_name)
             
-            # Handle collision safely
-            dest_path = self._get_unique_path(dest_path)
+            if os.path.exists(dest_path):
+                if on_conflict == 'skip':
+                    logger.info(f"Skipping {src_path} as {dest_path} already exists.")
+                    return None
+                elif on_conflict == 'rename':
+                    dest_path = self._get_unique_path(dest_path)
+                elif on_conflict == 'overwrite':
+                    logger.warning(f"Overwriting {dest_path}")
+                    if not dry_run:
+                        os.remove(dest_path)
 
             if dry_run:
                 logger.info(f"[Dry Run] Would move {src_path} to {dest_path}")

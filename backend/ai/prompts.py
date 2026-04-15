@@ -8,6 +8,7 @@ Analyze the following file and provide:
 1. A concise category (e.g., Invoice, Personal, Project, Receipt, Document).
 2. A list of 3-5 relevant tags.
 3. A suggested folder name.
+4. A confidence score between 0.0 and 1.0.
 
 File Metadata:
 - Name: {name}
@@ -22,7 +23,8 @@ Output in JSON format:
 {{
   "category": "...",
   "tags": ["...", "..."],
-  "suggested_folder": "..."
+  "suggested_folder": "...",
+  "confidence": 0.0-1.0
 }}
 """
 

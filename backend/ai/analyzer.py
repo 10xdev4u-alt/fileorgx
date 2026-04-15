@@ -46,7 +46,11 @@ class FileAnalyzer:
                 elif '```' in response:
                     response = response.split('```')[1].split('```')[0].strip()
                 
-                return json.loads(response)
+                result = json.loads(response)
+                # Ensure confidence exists
+                if 'confidence' not in result:
+                    result['confidence'] = 0.5
+                return result
             except (json.JSONDecodeError, IndexError) as e:
                 logger.error(f"Failed to parse LLM response: {e}")
                 return None

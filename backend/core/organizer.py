@@ -29,19 +29,23 @@ class FileOrganizer:
                 return str(new_path)
             counter += 1
 
-    def move_file(self, src_path, target_dir):
+    def move_file(self, src_path, target_dir, dry_run=False):
         """Moves a file to a target directory within the base path."""
         try:
             dest_dir = os.path.join(self.base_path, target_dir)
-            if not os.path.exists(dest_dir):
-                os.makedirs(dest_dir)
-            
             file_name = os.path.basename(src_path)
             dest_path = os.path.join(dest_dir, file_name)
             
             # Handle collision safely
             dest_path = self._get_unique_path(dest_path)
 
+            if dry_run:
+                logger.info(f"[Dry Run] Would move {src_path} to {dest_path}")
+                return dest_path
+
+            if not os.path.exists(dest_dir):
+                os.makedirs(dest_dir)
+            
             shutil.move(src_path, dest_path)
             logger.info(f"Moved {src_path} to {dest_path}")
             return dest_path
@@ -49,14 +53,19 @@ class FileOrganizer:
             logger.error(f"Error moving file: {e}")
             return None
 
-    def copy_file(self, src_path, target_dir):
+    def copy_file(self, src_path, target_dir, dry_run=False):
         """Copies a file to a target directory."""
         try:
             dest_dir = os.path.join(self.base_path, target_dir)
+            dest_path = os.path.join(dest_dir, os.path.basename(src_path))
+            
+            if dry_run:
+                logger.info(f"[Dry Run] Would copy {src_path} to {dest_path}")
+                return dest_path
+
             if not os.path.exists(dest_dir):
                 os.makedirs(dest_dir)
             
-            dest_path = os.path.join(dest_dir, os.path.basename(src_path))
             shutil.copy2(src_path, dest_path)
             logger.info(f"Copied {src_path} to {dest_path}")
             return dest_path
@@ -64,11 +73,16 @@ class FileOrganizer:
             logger.error(f"Error copying file: {e}")
             return None
 
-    def rename_file(self, src_path, new_name):
+    def rename_file(self, src_path, new_name, dry_run=False):
         """Renames a file in its current directory."""
         try:
             p = Path(src_path)
             new_path = p.with_name(new_name)
+            
+            if dry_run:
+                logger.info(f"[Dry Run] Would rename {src_path} to {new_path}")
+                return str(new_path)
+
             os.rename(src_path, new_path)
             logger.info(f"Renamed {src_path} to {new_path}")
             return str(new_path)

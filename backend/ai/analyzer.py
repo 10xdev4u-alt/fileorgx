@@ -4,6 +4,7 @@ from ai.prompts import FILE_ANALYSIS_SYSTEM_PROMPT, FILE_ANALYSIS_PROMPT_TEMPLAT
 from ai.ocr_processor import OCRManager
 from ai.image_analyzer import ImagePreprocessor
 from utils.logger import logger
+from utils.cache import FileAnalysisCache
 import os
 
 class FileAnalyzer:
@@ -13,10 +14,23 @@ class FileAnalyzer:
         self.client = client or OllamaClient()
         self.ocr = OCRManager()
         self.preprocessor = ImagePreprocessor()
+        self.cache = FileAnalysisCache()
 
     async def analyze_file(self, file_path, metadata):
         """Analyzes a file and returns organization suggestions."""
+        # Check cache first
+        cached = self.cache.get(file_path)
+        if cached:
+            logger.info(f"Using cached analysis for: {file_path}")
+            return cached
+
         content_snippet = "No content available."
+        
+        # ... (rest of logic) ...
+        # After getting result
+        if result:
+            self.cache.set(file_path, result)
+        return result
         
         # Extract content if it's an image
         if metadata.get('file_type', '').startswith('image/'):

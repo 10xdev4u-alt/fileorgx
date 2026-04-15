@@ -38,6 +38,21 @@ class RuleEngine:
                 return bool(re.search(c_val, content)) or bool(re.search(c_val, metadata.get('name', '')))
             elif c_type == 'size_greater_than':
                 return metadata.get('size', 0) > int(c_val)
+            elif c_type == 'file_type':
+                return c_val.lower() in metadata.get('file_type', '').lower()
+            elif c_type == 'created_after':
+                # Expecting c_val in ISO format
+                from datetime import datetime
+                created = metadata.get('created_at')
+                if isinstance(created, str):
+                    created = datetime.fromisoformat(created)
+                return created > datetime.fromisoformat(c_val)
+            elif c_type == 'modified_before':
+                from datetime import datetime
+                modified = metadata.get('modified_at')
+                if isinstance(modified, str):
+                    modified = datetime.fromisoformat(modified)
+                return modified < datetime.fromisoformat(c_val)
         except Exception as e:
             logger.error(f"Error checking rule condition: {e}")
             

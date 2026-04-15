@@ -24,15 +24,31 @@ class VectorDBManager:
     def add_file_content(self, file_id, content, metadata=None):
         """Adds file content to the vector database."""
         try:
+            # Chunking large content
+            chunks = self._chunk_text(content)
+            ids = [f"{file_id}_{i}" for i in range(len(chunks))]
+            metadatas = [metadata or {} for _ in range(len(chunks))]
+            for m in metadatas:
+                m['file_id'] = file_id
+
             self.collection.add(
-                documents=[content],
-                ids=[str(file_id)],
-                metadatas=[metadata] if metadata else None
+                documents=chunks,
+                ids=ids,
+                metadatas=metadatas
             )
             return True
         except Exception as e:
             logger.error(f"Error adding to ChromaDB: {str(e)}")
             return False
+
+    def _chunk_text(self, text, chunk_size=1000, overlap=100):
+        """Splits text into overlapping chunks."""
+        chunks = []
+        for i in range(0, len(text), chunk_size - overlap):
+            chunks.append(text[i:i + chunk_size])
+            if i + chunk_size >= len(text):
+                break
+        return chunks
 
     def search(self, query, n_results=5):
         """Searches for similar files based on a natural language query."""

@@ -46,6 +46,32 @@ class ImagePreprocessor:
             logger.error(f"Error during image preprocessing: {str(e)}")
             return None
 
+    @staticmethod
+    def get_image_hash(image_path):
+        """Calculates a perceptual hash of an image."""
+        try:
+            img = cv2.imread(image_path)
+            # Downsample and convert to grayscale
+            resized = cv2.resize(img, (8, 8), interpolation=cv2.THREADS)
+            gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+            # Calculate average intensity
+            avg = gray.mean()
+            # Generate hash string from binary comparison
+            return "".join(["1" if b > avg else "0" for b in gray.flatten()])
+        except Exception as e:
+            logger.error(f"Error generating image hash: {str(e)}")
+            return None
+
+    @staticmethod
+    def calculate_similarity(hash1, hash2):
+        """Calculates Hamming distance between two hashes."""
+        if not hash1 or not hash2 or len(hash1) != len(hash2):
+            return 0.0
+        
+        diffs = sum(1 for a, b in zip(hash1, hash2) if a != b)
+        # Higher similarity = lower distance
+        return 1.0 - (diffs / len(hash1))
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1:

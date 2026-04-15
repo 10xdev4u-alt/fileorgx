@@ -1,10 +1,21 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from database.db import get_db, init_db
 from database.models import File
 from utils.logger import logger
+import traceback
 
 app = FastAPI(title="Smart File Organizer API")
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception: {str(exc)}")
+    logger.error(traceback.format_exc())
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "An internal server error occurred.", "message": str(exc)},
+    )
 
 @app.on_event("startup")
 def startup_event():
